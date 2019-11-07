@@ -97,13 +97,61 @@ module longdivider(Clock, Resetn, s, LA, EB, DataA, DataB, R, Q, Done);
 	shiftlne ShiftQ(0, 0, EQ, Cout, Clock, Q);
 		defparam ShiftQ.n = n;
 
-	downcount Counter (Clock, EC, LC, Count);
+	downcount Counter(Clock, EC, LC, Count);
 		defparam Counter.n = logn;
 
 	assign z = (Count == 0);
 	
 	// 2 to 1 mux:
 	assign DataR = Rsel ? Sum[n-1:0] : 0;
+
+endmodule
+
+// other modules taken from textbook
+module regne(R, Clock, Resetn, E, Q);
+	parameter n = 8;
+	input [n–1:0] R;
+	input Clock, Resetn, E;
+	output reg [n–1:0] Q;
+
+	always @(posedge Clock, negedge Resetn)
+		if (Resetn == 0)
+			Q <= 0;
+		else if (E)
+			Q <= R;
+endmodule
+
+module shiftlne(R, L, E, w, Clock, Q);
+	parameter n = 8;
+	input [n–1:0] R;
+	input L, E, w, Clock;
+	output reg [n–1:0] Q;
+	integer k;
+
+	always @(posedge Clock)
+	begin
+		if (L)
+			Q <= R;
+		else if (E)
+		begin
+			Q[0] <= w;
+			for(k=1; k<n; k=k+1)
+				Q[k] <= Q[k-1];
+		end
+	end
+endmodule
+
+module downcount(R, Clock, E, L, Q);
+	parameter n = 3;
+	input [n–1:0] R;
+	input Clock, L, E;
+	output reg [n–1:0] Q;
+	
+	always @(posedge Clock)
+		if (L)
+			Q <= R;
+		else if (E)
+			Q <= Q – 1;
 
 endmodule
 

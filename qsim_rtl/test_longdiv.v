@@ -31,10 +31,10 @@ module testbench();
 	// generate test patterns
 	initial
 	begin
-		data_in_num[0]=8'b00010000;
-		data_in_den[0]=8'b00000010;
-		data_out_quo[0]=8'b00001000;
-		data_out_rem[0]=8'b00000000;
+		data_in_num[0]=8'b00001111;  // 15
+		data_in_den[0]=8'b00000010;  // 2
+		data_out_quo[0]=8'b00000111;  // 7
+		data_out_rem[0]=8'b00000001;  // 1
 	end
 
 	// initialize inputs
@@ -59,11 +59,18 @@ module testbench();
 	// startup
 	initial
 	begin
-		#`CLOCK_PERIOD
+		#`CLOCK_PERIOD;
 		rst = 1;
 		A = data_in_num[0];
 		B = data_in_den[0];
-		#(`CLOCK_PERIOD*10);
+		LA = 1;
+		EB = 1;
+		#`CLOCK_PERIOD;
+		LA = 0;
+		EB = 0;
+		s = 1;
+		#`CLOCK_PERIOD;
+		s = 0;
 	end
 
 	// check tests
@@ -75,7 +82,7 @@ module testbench();
 		$display("Time%d: Numerator=%h; Denominator=%h; Expected Quotient=%h; Actual Quotient=%h; Expected Remainder=%h; Actual Remainder=%h", $stime, A, B, data_out_quo[0], Q, data_out_rem[0], R);
 
 		$display("End of simulation.");
-		#`CLOCK_PERIOD
+		#(`CLOCK_PERIOD*3);
 		$finish;
 	end
 endmodule

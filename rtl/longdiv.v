@@ -94,10 +94,10 @@ module longdivider(Clock, Resetn, s, LA, EB, DataA, DataB, R, Q, Done);
 	assign Sum = {1'b0, R} + {1'b0, ~B} + 1;
 	assign Cout = Sum[n];
 	
-	shiftlne ShiftQ(n'b0, 1'b0, EQ, Cout, Clock, Q);
+	shiftlne ShiftQ(8'b0, 1'b0, EQ, Cout, Clock, Q);
 		defparam ShiftQ.n = n;
 
-	downcount Counter(logn'b111, Clock, EC, LC, Count);
+	downcount Counter(3'b111, Clock, EC, LC, Count);
 		defparam Counter.n = logn;
 
 	assign z = (Count == 0);

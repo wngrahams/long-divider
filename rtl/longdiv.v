@@ -22,7 +22,7 @@ module longdivider(Clock, Resetn, s, LA, EB, DataA, DataB, R, Q, Done);
 	reg [1:0] y, Y;
 	wire [n-1:0] A, B;
 	wire [logn-1:0] Count;
-	reg EA, Rsel, LR, ER, ER0, LC, EC;
+	reg EA, Rsel, LR, ER, LC, EC, EQ;
 	integer k;
 
 	// control circuit (from ASM chart)
@@ -38,7 +38,7 @@ module longdivider(Clock, Resetn, s, LA, EB, DataA, DataB, R, Q, Done);
 			    else Y = S4;
 			S4: if (s==0) Y = S1;
 			    else Y = S4;
-			default: Y = 2’bxx;
+			default: Y = 2'bxx;
 		endcase
 	end
 
@@ -86,18 +86,18 @@ module longdivider(Clock, Resetn, s, LA, EB, DataA, DataB, R, Q, Done);
 	// datapath circuit
 	regne RegB (DataB, Clock, Resetn, EB, B);
 		defparam RegB.n = n;
-	shiftlne ShiftA(DataA, LA, EA, 0, Clock, A);
+	shiftlne ShiftA(DataA, LA, EA, 1'b0, Clock, A);
 		defparam ShiftA.n = n;
 	shiftlne ShiftR (DataR, LR, ER, A[n-1], Clock, R);
 		defparam ShiftR.n = n;
 
-	assign Sum = {1’b0, R} + {1’b0, ~B} + 1;
+	assign Sum = {1'b0, R} + {1'b0, ~B} + 1;
 	assign Cout = Sum[n];
 	
-	shiftlne ShiftQ(0, 0, EQ, Cout, Clock, Q);
+	shiftlne ShiftQ(n'b0, 1'b0, EQ, Cout, Clock, Q);
 		defparam ShiftQ.n = n;
 
-	downcount Counter(Clock, EC, LC, Count);
+	downcount Counter(logn'b111, Clock, EC, LC, Count);
 		defparam Counter.n = logn;
 
 	assign z = (Count == 0);
@@ -110,9 +110,9 @@ endmodule
 // other modules taken from textbook
 module regne(R, Clock, Resetn, E, Q);
 	parameter n = 8;
-	input [n–1:0] R;
+	input [n-1:0] R;
 	input Clock, Resetn, E;
-	output reg [n–1:0] Q;
+	output reg [n-1:0] Q;
 
 	always @(posedge Clock, negedge Resetn)
 		if (Resetn == 0)
@@ -123,9 +123,9 @@ endmodule
 
 module shiftlne(R, L, E, w, Clock, Q);
 	parameter n = 8;
-	input [n–1:0] R;
+	input [n-1:0] R;
 	input L, E, w, Clock;
-	output reg [n–1:0] Q;
+	output reg [n-1:0] Q;
 	integer k;
 
 	always @(posedge Clock)
@@ -143,15 +143,15 @@ endmodule
 
 module downcount(R, Clock, E, L, Q);
 	parameter n = 3;
-	input [n–1:0] R;
+	input [n-1:0] R;
 	input Clock, L, E;
-	output reg [n–1:0] Q;
+	output reg [n-1:0] Q;
 	
 	always @(posedge Clock)
 		if (L)
 			Q <= R;
 		else if (E)
-			Q <= Q – 1;
+			Q <= Q - 1;
 
 endmodule
 
